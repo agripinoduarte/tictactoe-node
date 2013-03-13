@@ -4,6 +4,7 @@ document.observe("dom:loaded", novo);
 function novo() {
 	tabuleiro = new Tabuleiro('velha');
 	socket.on('markmove', function(data) {
+		console.log(data);
 		ponto = new Ponto(data.x, data.y);
 		if (data.type == 'circle') {
 			tabuleiro.marcarBola(tabuleiro.canvas, ponto);
@@ -15,6 +16,20 @@ function novo() {
 	window.setInterval(function() {
 		socket.emit('reloadplayerlist', {});
 	}, 5000);
+}
+
+
+function getParameterByName(name)
+{
+	name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+	var regexS = "[\\?&]" + name + "=([^&#]*)";
+	var regex = new RegExp(regexS);
+	var results = regex.exec(window.location.search);
+	
+	if(results == null)
+		return "";
+	else
+		return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 //var
@@ -184,10 +199,12 @@ Tabuleiro.prototype = {
 			marcar(this.context, ponto = new Ponto(230, 230));
 		}
 
+		playerId = getParameterByName('playwith');
+
 		if (this.jogadorAtivo) {
-			socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'cross'});
+			socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'cross', playerId: playerId});
 		} else {
-			socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle'});
+			socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle', playerId: playerId});
 		}
 
 	}
