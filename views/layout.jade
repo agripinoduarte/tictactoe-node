@@ -1,0 +1,11 @@
+doctype 5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    block scripts
+      script(src='socket.io/socket.io.js')
+      script(src='javascripts/prototype.js')
+      script(src='javascripts/gameinterface.js')
+  body
+    block content

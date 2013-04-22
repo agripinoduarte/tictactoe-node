@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)http://mosampaio-samples.appspot.com/jogoDaVelha/index.html -->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+	    <meta charset="utf-8"> 
+	    <script src="http://localhost:1337/socket.io/socket.io.js"></script>
+		<script src="./prototype.js" type="text/javascript"></script>
+		<script src="./gameinterface.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			// socket.emit('checklogged', {user: 'none'});
+		</script>  
+		<style type="text/css">
+			#content {
+				margin-left: 40%;
+				margin-right: 30%
+			}
+
+			#sidebar {
+				margin-right: 30%;
+			}
+		</style>
+	</head>
+  <body>
+  <div id="content"> 
+    <canvas id="velha" width="300" height="300">Canvas não habilitado no browser.</canvas> 
+	<br>
+	<input type="button" value="Novo Jogo" onclick="javascript:novo()">
+	</div>
+	<div class="sidebar">
+	 <h2>Jogadores Cadastrados</h2>
+   		<div id="playerlist">
+   		</div>
+   		<a href="register">Cadastrar</a>
+   	</div>
+   	<footer>
+   		from: <a href="http://www.mosampaio.com.br/">http://www.mosampaio.com.br</a>
+   	</footer>
+ </body>
+ </html>

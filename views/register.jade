@@ -1,0 +1,15 @@
+extends layout
+
+block content
+	div#content
+		h1= title
+		p Informe seus dados
+		form(action="register", method="post")
+			#username
+				label Usuário
+					input(name="user[name]")
+			#password
+			label Senha
+				input(name="user[password]")
+			#send
+				input(type="submit", value="Registrar")
