@@ -1,0 +1,15 @@
+extends layout
+
+block content
+	div#content
+		h1= title
+		p Informe suas credenciais
+		form(action="login", method="post")
+			#username
+				label Usuário
+					input(name="user[name]")
+			#password
+			label Senha
+				input(name="user[password]")
+			#send
+				input(type="submit", value="Login")
