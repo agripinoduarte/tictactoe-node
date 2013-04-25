@@ -46,6 +46,7 @@ app.get('/register', function(req, res) {
 
 app.post('/register', function(req, res) {
 	client.collection('users', function(err, collection) {
+        console.log(req.body);
 		collection.save(req.body, function() {
 			console.log('Salvo');
 		});
@@ -58,17 +59,23 @@ app.get('/login', function(req, res) {
 	res.render('login', {title: "Autenticação"});
 });
 
+app.get('/logout', function(req, res) {
+    res.cookie("loggeduser", false);
+    res.redirect('/');
+});
+
 app.post('/login', function(req, res) {
+    var request = req;
 	 client.collection('users', function(err, collection) {
-	 	collection.findOne({username: req.body.username}, function(err, result) { 
-            if (result != null) {
-                if (req.body.password == result.password) {
+	 	collection.findOne({username: request.body.user.username}, function(err, result) { 
+            if (result != null && request.body.user.password == result.password) {
                     logged = true;
-                    res.redirect('/');
                     res.cookie("loggeduser", true);
-                }
+                    res.redirect('/');
+                    console.log('logado');
+            } else {
+            	res.redirect('register');
             }
-            res.redirect('register');
         });
 	 });
 });
