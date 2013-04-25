@@ -21,7 +21,7 @@ client.open(function(err, p_client) {
 
 
 // Variaveis de Ambiente
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || process.argv[2]);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
