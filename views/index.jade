@@ -10,6 +10,6 @@ block content
 			ul
 			each user in userList
 				li 
-					a(href="/game") #{user.username}
+					a#requester(href="#") #{user.username}
 		div(style="float:right")
 			a(href="/logout") Sair

@@ -19,8 +19,6 @@ Para instalar o ambiente de execução do jogo, execute:
 
 	sudo apt-get install nodejs npm mongodb
 
-### Linux (Red Hat/Fedora/Suse)
-
 Esse comando instalará o Node.js, o gerenciador de pacotes npm e o banco de dados MongoDB.
 Descompacte o arquivo tictactoe.tar.gz. Entre no diretório tictactoe e execute
 	

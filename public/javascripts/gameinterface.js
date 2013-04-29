@@ -14,6 +14,8 @@ function novo() {
 }
 
 
+
+
 function getParameterByName(name)
 {
 	name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
