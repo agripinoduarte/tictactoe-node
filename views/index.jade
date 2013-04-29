@@ -3,9 +3,13 @@ extends layout
 block content
 	div#content
 		h1= title
-		p Cadastre-se para jogar
+		div#game
 		if (logged == true)
-			canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
-			input(type="button", value="novo", onclick="javascript:novo()")
-		div
+			p Escolha um jogador da lista
+			div#userList
+			ul
+			each user in userList
+				li 
+					a(href="/game") #{user.username}
+		div(style="float:right")
 			a(href="/logout") Sair

@@ -4,9 +4,13 @@ document.observe("dom:loaded", novo);
 function novo() {
 	tabuleiro = new Tabuleiro('velha');
 
-	window.setInterval(function() {
-		socket.emit('playermove', {});
-	}, 5000);
+	// window.setInterval(function() {
+	// 	socket.emit('playermove', {});
+	// }, 5000);
+
+	socket.on('requestuser', function() {
+		alert("oi");
+	});
 }
 
 
@@ -196,13 +200,8 @@ Tabuleiro.prototype = {
 			marcar(this.context, ponto = new Ponto(230, 230));
 		}
 
-		playerId = getParameterByName('playwith');
 
-		// if (this.jogadorAtivo) {
-		// 	socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'cross', playerId: playerId});
-		// } else {
-		// 	socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle', playerId: playerId});
-		// }
+		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle'});
 
 	},
 	drawCircle: function(context,x,y,h,w) {

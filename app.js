@@ -2,6 +2,11 @@
  * Module dependencies.
 */
 
+if (process.argv[2] == undefined) {
+    console.log('Informe o número da porta')
+    process.exit();
+}
+
 var express = require('express'), 
 routes = require('./routes'),  
 user = require('./routes/user'),    
@@ -39,16 +44,25 @@ if ('development' == app.get('env')) {
 }
 
 ///// Rotas
-app.get('/', routes.index);
+app.get('/', function(req, res) {
+    client.collection('users', function(err, collection) {
+        if (req.cookies.loggeduser == 'false') {
+            res.redirect('login');
+        }
+        logged = true;
+        collection.find().toArray(function(err, result) {
+            res.render('index', { title: 'Jogo da Velha Multiplayer', userList: result, logged: logged});
+        });
+
+    });
+});
 app.get('/register', function(req, res) {
 	res.render('register', {title: "Cadastro"});
 });
 
 app.post('/register', function(req, res) {
 	client.collection('users', function(err, collection) {
-        console.log(req.body);
 		collection.save(req.body, function() {
-			console.log('Salvo');
 		});
 	});
 
@@ -59,32 +73,25 @@ app.get('/login', function(req, res) {
 	res.render('login', {title: "Autenticação"});
 });
 
+app.get('/game', function(req, res) {
+    client.collection('gamesessions', function(err, collection) {
+        collection.save({time: mongo.Timestamp()}, function(e,r){
+           logged = req.cookies.loggeduser !== undefined;
+           res.render('game', {session: r, title: 'Novo Jogo', logged: logged});
+        })
+    });
+});
+
+app.get('/gamerequest', function(req, res) {
+    user = req.user;    
+});
+
 app.get('/logout', function(req, res) {
     res.cookie("loggeduser", false);
     res.redirect('/');
 });
 
-app.post('/login', function(req, res) {
-    var request = req;
-	 client.collection('users', function(err, collection) {
-	 	collection.findOne({username: request.body.user.username}, function(err, result) { 
-            if (result != null && request.body.user.password == result.password) {
-                    logged = true;
-                    res.cookie("loggeduser", true);
-                    res.redirect('/');
-                    console.log('logado');
-            } else {
-            	res.redirect('register');
-            }
-        });
-	 });
-});
-
-// Servidor HTTP
-http.listen(app.get('port'), function(){
-	console.log('Express server listening on port ' + app.get('port'));
-});
-
+requests = [];
 
 // Socket.io
 var io = require('socket.io').listen(http);
@@ -92,7 +99,30 @@ io.sockets.on('connection', function (socket) {
 	console.log("Socket.io running");
     // Eventos
     socket.on('playermove', function (data) {
-    	console.log("move");
     });
 
+    socket.on('requestuser', function (data) {
+        console.log("emitido");
+        requests[req.cookies.loggeduser]['socket'] = socket;
+    });
+});
+
+
+app.post('/login', function(req, res) {
+    var request = req;
+     client.collection('users', function(err, collection) {
+        collection.findOne({username: request.body.user.username}, function(err, result) { 
+            if (result != null && request.body.user.password == result.password) {
+                    res.cookie("loggeduser", result._id);
+                    res.redirect('/');
+            } else {
+                res.redirect('register');
+            }
+        });
+     });
+});
+
+// Servidor HTTP
+http.listen(app.get('port'), function(){
+    console.log('Express server listening on port ' + app.get('port'));
 });

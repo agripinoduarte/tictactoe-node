@@ -7,7 +7,10 @@ a extensão Socket.io. Os dadosdos jogadores são persistidos no banco de dados 
 
 ## Requisitos
 O aplicativo roda em qualquer sistema operacional onde o Node.js e MongoDB tenham suporte. Em geral, sistemas Unix (Linux,
-BSD e MacOS) e Windows.
+BSD e MacOS) e Windows. Requisitos mínimos
+	
+	NodeJS 0.4.8
+	MongoDB 2.4
 
 ## Instalação 
 
@@ -15,6 +18,8 @@ BSD e MacOS) e Windows.
 Para instalar o ambiente de execução do jogo, execute:
 
 	sudo apt-get install nodejs npm mongodb
+
+### Linux (Red Hat/Fedora/Suse)
 
 Esse comando instalará o Node.js, o gerenciador de pacotes npm e o banco de dados MongoDB.
 Descompacte o arquivo tictactoe.tar.gz. Entre no diretório tictactoe e execute
