@@ -3,9 +3,7 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-    block scripts
-      script(src='socket.io/socket.io.js')
-      script(src='javascripts/prototype.js')
-      script(src='javascripts/gameinterface.js')
+    script(src='socket.io/socket.io.js')
+    script(src='/javascripts/init.js')
   body
     block content

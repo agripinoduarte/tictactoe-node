@@ -1,4 +1,4 @@
-/**
+3/**
  * Module dependencies.
 */
 
@@ -38,24 +38,51 @@ app.use(express.cookieParser());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+var recentUserId = null;
+var sockets = [];
+var users = [];
+
 // Somente Desenvolvimento 
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
 }
 
+var userlist = {
+    list: [],
+    add: function(user) {
+        this.list.push(user);
+        // io.sockets.emit('user-list', {
+        //     'users': this.list
+        // });
+    },
+    remove: function(user) {
+        var index = this.list.indexOf(user);
+        if (index != -1) {
+            this.list.splice(index, 1);
+            io.sockets.emit('user-list', {
+                'users': this.list
+            });
+            return true;          
+        }
+        return false;
+    },
+    get: function() {
+        return this.list;
+    }
+}
+
 ///// Rotas
 app.get('/', function(req, res) {
-    client.collection('users', function(err, collection) {
-        if (req.cookies.loggeduser == 'false') {
-            res.redirect('login');
-        }
-        logged = true;
-        collection.find().toArray(function(err, result) {
-            res.render('index', { title: 'Jogo da Velha Multiplayer', userList: result, logged: logged});
-        });
+     if (req.cookies.loggeduser == 'false') {
+        res.redirect('login');
+    }
 
-    });
+    recentUserId = req.cookies.loggeduser;
+    logged = true;
+    console.log(userlist.get());
+    res.render('index', { title: 'Jogo da Velha Multiplayer', userList: userlist.get(), logged: logged});
 });
+
 app.get('/register', function(req, res) {
 	res.render('register', {title: "Cadastro"});
 });
@@ -75,14 +102,11 @@ app.get('/login', function(req, res) {
 
 app.get('/game', function(req, res) {
     client.collection('gamesessions', function(err, collection) {
-        collection.save({time: mongo.Timestamp()}, function(e,r){
-           logged = req.cookies.loggeduser !== undefined;
-           res.render('game', {session: r, title: 'Novo Jogo', logged: logged});
-        })
+        res.render('game', {session: r, title: 'Novo Jogo', logged: logged});
     });
 });
 
-app.get('/gamerequest', function(req, res) {
+app.get('/gamesession', function(req, res) {
     user = req.user;    
 });
 
@@ -91,36 +115,40 @@ app.get('/logout', function(req, res) {
     res.redirect('/');
 });
 
-requests = [];
 
 // Socket.io
 var io = require('socket.io').listen(http);
-io.sockets.on('connection', function (socket) {
-	console.log("Socket.io running");
-    // Eventos
-    socket.on('playermove', function (data) {
-    });
-
-    socket.on('requestuser', function (data) {
-        console.log("emitido");
-        requests[req.cookies.loggeduser]['socket'] = socket;
-    });
-});
-
 
 app.post('/login', function(req, res) {
     var request = req;
      client.collection('users', function(err, collection) {
         collection.findOne({username: request.body.user.username}, function(err, result) { 
             if (result != null && request.body.user.password == result.password) {
-                    res.cookie("loggeduser", result._id);
-                    res.redirect('/');
+                recentUserId = result._id;
+                userlist.add(result);
+                res.cookie("loggeduser", result._id);
+                res.redirect('/');
             } else {
                 res.redirect('register');
             }
         });
      });
 });
+
+io.sockets.on('connection', function (socket) {
+	console.log("Socket.io running");
+    sockets[socket.id] = socket;
+    users[recentUserId] = socket;
+    // Eventos
+    socket.on('playermove', function (data) {
+    });
+
+    socket.on('requestplay', function (data) {
+        socket = users[data.userid];
+        socket.emit('requestuser');
+    });
+});
+
 
 // Servidor HTTP
 http.listen(app.get('port'), function(){

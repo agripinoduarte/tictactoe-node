@@ -1,5 +1,5 @@
 extends layout
-
+script "console.log(userList)"
 block content
 	div#content
 		h1= title
@@ -10,6 +10,6 @@ block content
 			ul
 			each user in userList
 				li 
-					a#requester(href="#") #{user.username}
+					a#requester(href="#", onclick="return requestplay(this)", rel=user._id) #{user.username}
 		div(style="float:right")
 			a(href="/logout") Sair
