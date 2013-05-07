@@ -1,4 +1,5 @@
 document.observe("dom:loaded", novo);
+var gamesessionid = getGameSession();
 
 function novo() {
 	tabuleiro = new Tabuleiro('velha');
@@ -191,7 +192,7 @@ Tabuleiro.prototype = {
 		}
 
 
-		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle'});
+		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle', gamesessionid: gamesessionid});
 
 	},
 	drawCircle: function(context,x,y,h,w) {

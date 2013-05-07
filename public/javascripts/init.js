@@ -1,13 +1,27 @@
 var socket = io.connect('http://localhost:3000');
 
-socket.on('requestuser', function() {
-	alert("oi");
+socket.on('requestuser', function(data) {
+	ok = confirm('O jogador "' + data.username + '" deseja jogar com você. Clique em OK para iniciar a partida');
+	if (ok) {
+		socket.emit('acceptgame', {requesterid: data.userid, gamesessionid: data.gamesessionid});
+		window.location = '/game';
+		setCookie('gamesessionid', data.gamesessionid,2);
+	}
 });
 
 socket.on('connect', function () {
     setCookie("sessionid", this.socket.sessionid, 2);
 });
 
+socket.on('requestaccepted', function (data) {
+	window.location = '/game';
+	setCookie('gamesessionid', data.gamesessionid,2);
+});
+
+
+socket.on('mark', function(data) {
+	console.log(data);
+});
 //
 
 function setCookie(c_name, value, exdays)
@@ -18,15 +32,22 @@ function setCookie(c_name, value, exdays)
 	document.cookie = c_name + "=" + c_value;
 }
 
-function getCookie(name)
+function getLoggedUser()
 {
-	cookie = document.cookie;
+	value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
+	loggeduser = value[0].slice(18,42);
+	return loggeduser;
+}
 
-	value = cookie.match(/sessionid=[a-zA-Z0-9]+/);
-	console.log(value[0]);
+function getGameSession()
+{
+	value = document.cookie.match(/gamesessionid=[a-zA-Z0-9\%]+/);
+	gamesessionid = value[0].slice(14);
+	return gamesessionid;
 }
 
 function requestplay(e)
-{
-	socket.emit('requestplay', {sessionid: socket.socket.sessionid, userid: e.getAttribute('rel')});
+{	
+	socket.emit('requestplay', {sessionid: socket.socket.sessionid, userid: e.getAttribute('rel'), requesterid: getLoggedUser()});
 }
+
