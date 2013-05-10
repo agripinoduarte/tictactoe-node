@@ -172,20 +172,29 @@ io.sockets.on('connection', function (socket) {
     socket.on('playermove', function (data) {  
         gamesession = gamesessions.getById(data.gamesessionid);
         gamesession.selfsocket.emit('mark', {x: data.x, y: data.y, type: data.type});
-        gamesession.othersocket.emit('mark', {x: data.x, y: data.y, type: data.type})
+        gamesession.othersocket.emit('mark', {x: data.x, y: data.y, type: data.type});
     });
 
     socket.on('requestplay', function (data) {
-        socket = users[data.userid];
+        sock = users[data.userid];
         user = userlist.getById(data.requesterid);
-        gamesessionid = gamesessions.add(data.userid, data.requesterid);
-        socket.emit('requestuser', {username: user.username, userid: user._id, gamesessionid: gamesessionid});
+        sock.emit('requestUser', {username: user.username, userid: user._id, requesterid: data.userid});
     });
 
-    socket.on('acceptgame', function(data){
-        socket = users[data.requesterid]; 
-        socket.emit('requestaccepted', {gamesessionid: gamesessionid});
+    socket.on('acceptGame', function(data) {
+        sock = users[data.requesterid]; 
+        gamesessionid = gamesessions.add(data.userid, data.requesterid);
+        sock = users[data.userid];
+        otherSock = users[data.requesterid];
+
+        sock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
+        otherSock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
+        sock.emit('requestAccepted', {userid: data.userid, requesterid: data.requesterid});
     });
+
+    socket.on('updateGameSession', function(data) {
+        console.log('update');
+    })
 });
 
 

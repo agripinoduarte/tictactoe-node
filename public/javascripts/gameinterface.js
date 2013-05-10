@@ -3,6 +3,17 @@ var gamesessionid = getGameSession();
 
 function novo() {
 	tabuleiro = new Tabuleiro('velha');
+	socket.on('mark', function(data) {
+		ponto = new Ponto(data.x, data.y);
+
+
+		if (tabuleiro.jogadorAtivo) {
+			tabuleiro.marcarBola(tabuleiro.context, ponto);
+		} else {
+			tabuleiro.marcarX(tabuleiro.context, ponto);
+		}
+		
+	});
 }
 
 function getParameterByName(name)
@@ -190,7 +201,6 @@ Tabuleiro.prototype = {
 		} else if (number == 9) {
 			marcar(this.context, ponto = new Ponto(230, 230));
 		}
-
 
 		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle', gamesessionid: gamesessionid});
 

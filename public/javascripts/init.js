@@ -1,11 +1,9 @@
 var socket = io.connect('http://localhost:3000');
 
-socket.on('requestuser', function(data) {
+socket.on('requestUser', function(data) {
 	ok = confirm('O jogador "' + data.username + '" deseja jogar com você. Clique em OK para iniciar a partida');
 	if (ok) {
-		socket.emit('acceptgame', {requesterid: data.userid, gamesessionid: data.gamesessionid});
-		window.location = '/game';
-		setCookie('gamesessionid', data.gamesessionid,2);
+		socket.emit('acceptGame', {requesterid: data.requesterid, userid: data.userid});
 	}
 });
 
@@ -13,16 +11,14 @@ socket.on('connect', function () {
     setCookie("sessionid", this.socket.sessionid, 2);
 });
 
-socket.on('requestaccepted', function (data) {
-	window.location = '/game';
-	setCookie('gamesessionid', data.gamesessionid,2);
+socket.on('requestAccepted', function (data) {
+	socket.emit('updateGameSession', {requesterid: data.requesterid, userid: userid});
 });
 
-
-socket.on('mark', function(data) {
-	console.log(data);
+socket.on('updateGameSessionCookie', function (data) {
+	setCookie('gamesessionid', data.gamesessionid, 2);
 });
-//
+
 
 function setCookie(c_name, value, exdays)
 {
