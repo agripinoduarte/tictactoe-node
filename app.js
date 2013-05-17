@@ -141,6 +141,9 @@ app.get('/game', function(req, res) {
 app.get('/logout', function(req, res) {
     res.cookie("loggeduser", false);
     res.redirect('/');
+    user = userlist.getById(req.cookies.loggeduser);
+
+    userlist.remove(user);
 });
 
 
@@ -171,8 +174,14 @@ io.sockets.on('connection', function (socket) {
     // Eventos
     socket.on('playermove', function (data) {  
         gamesession = gamesessions.getById(data.gamesessionid);
-        gamesession.selfsocket.emit('mark', {x: data.x, y: data.y, type: data.type});
-        gamesession.othersocket.emit('mark', {x: data.x, y: data.y, type: data.type});
+
+        if (gamesession.selfsocket != undefined) {
+            gamesession.selfsocket.emit('mark', {x: data.x, y: data.y, type: data.type});    
+        }
+
+        if (gamesession.othersocket != undefined) {
+            gamesession.othersocket.emit('mark', {x: data.x, y: data.y, type: data.type});
+        }
     });
 
     socket.on('requestplay', function (data) {
@@ -189,12 +198,24 @@ io.sockets.on('connection', function (socket) {
 
         sock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
         otherSock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
-        sock.emit('requestAccepted', {userid: data.userid, requesterid: data.requesterid});
+        sock.emit('requestAccepted', {userid: data.userid, requesterid: data.requesterid, shape: 'x'});
     });
 
     socket.on('updateGameSession', function(data) {
         console.log('update');
-    })
+    });
+
+    socket.on('clearBoard', function(data) {
+        gamesession = gamesessions.getById(data.gamesessionid);
+
+        if (gamesession.selfsocket != undefined) {
+            gamesession.selfsocket.emit('clearAllBoards', {});    
+        }
+
+        if (gamesession.othersocket != undefined) {
+            gamesession.othersocket.emit('clearAllBoards', {}); 
+        }
+    });
 });
 
 

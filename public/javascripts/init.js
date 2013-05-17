@@ -1,5 +1,12 @@
 var socket = io.connect('http://localhost:3000');
 
+var user = {
+	myShape: 'circle',
+	setShape: function(shape) {
+		this.myShape = shape;
+	}
+};
+
 socket.on('requestUser', function(data) {
 	ok = confirm('O jogador "' + data.username + '" deseja jogar com você. Clique em OK para iniciar a partida');
 	if (ok) {
@@ -12,7 +19,8 @@ socket.on('connect', function () {
 });
 
 socket.on('requestAccepted', function (data) {
-	socket.emit('updateGameSession', {requesterid: data.requesterid, userid: userid});
+	socket.emit('updateGameSession', {requesterid: data.requesterid, userid: data.userid});
+	user.setShape('x');
 });
 
 socket.on('updateGameSessionCookie', function (data) {

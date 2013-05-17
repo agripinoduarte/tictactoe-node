@@ -1,19 +1,21 @@
 document.observe("dom:loaded", novo);
 var gamesessionid = getGameSession();
+var tabuleiro;
+
+
+////////////////////////// Observers /////////////////
+socket.on('clearAllBoards', function(data) {
+	novo();
+});
+
+
+/////////////////////// Funções //////////////////////
+function clearBoard() {
+	socket.emit('clearBoard', {gamesessionid: gamesessionid});
+}
 
 function novo() {
 	tabuleiro = new Tabuleiro('velha');
-	socket.on('mark', function(data) {
-		ponto = new Ponto(data.x, data.y);
-
-
-		if (tabuleiro.jogadorAtivo) {
-			tabuleiro.marcarBola(tabuleiro.context, ponto);
-		} else {
-			tabuleiro.marcarX(tabuleiro.context, ponto);
-		}
-		
-	});
 }
 
 function getParameterByName(name)
@@ -28,10 +30,6 @@ function getParameterByName(name)
 	else
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
-
-//var
-var tabuleiro;
-
 //classe Ponto
 var Ponto = Class.create();
 Ponto.prototype = {
@@ -51,6 +49,7 @@ Ponto.prototype = {
 var Tabuleiro = Class.create();
 Tabuleiro.prototype = {
 	initialize: function(canvasId) {
+		var e;
 		var canvas = document.getElementById(canvasId);
 		this.setCanvas(canvas);
 		this.canvas.width = 300;
@@ -60,8 +59,20 @@ Tabuleiro.prototype = {
 		this.setJogadorAtivo(true);
 		this.desenhar();
 		Event.observe(canvasId, 'click', function(event) {
+			e = event;
 			return main(tabuleiro, event);
 		});
+
+		socket.on('mark', function(data) {
+			ponto = new Ponto(data.x, data.y);
+			if (data.type == 'circle') {
+				tabuleiro.marcarBola(tabuleiro.context, ponto);
+			} else {
+				tabuleiro.marcarX(tabuleiro.context, ponto);
+			}
+			return main(tabuleiro, event);
+		});
+
 	},
 	setCanvas: function(canvas) {
 		this.canvas = canvas;
@@ -180,7 +191,7 @@ Tabuleiro.prototype = {
 	},
 	marcarJogada: function(number){
 		this.posicoes[number] = this.jogadorAtivo;
-		var marcar = this.jogadorAtivo ? this.marcarX : this.marcarBola;
+		var marcar = user.myShape == 'x' ? this.marcarX : this.marcarBola;
 
 		if (number == 1) {
 			marcar(this.context, ponto = new Ponto(30, 30));
@@ -202,8 +213,7 @@ Tabuleiro.prototype = {
 			marcar(this.context, ponto = new Ponto(230, 230));
 		}
 
-		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : 'circle', gamesessionid: gamesessionid});
-
+		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : user.myShape , gamesessionid: gamesessionid});
 	},
 	drawCircle: function(context,x,y,h,w) {
 		// drawing circle
