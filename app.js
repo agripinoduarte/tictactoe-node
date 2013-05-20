@@ -114,6 +114,22 @@ app.get('/', function(req, res) {
     }
 
     recentUserId = req.cookies.loggeduser;
+    user = userlist.getById(recentUserId);
+
+    if (user != undefined) {
+        userlist.remove(user);
+        console.log('removido');
+        client.collection('users', function(err, collection) {
+        collection.findOne({username: user.username}, function(err, result) { 
+            if (result != null) {
+                console.log('adicionado');
+                userlist.add(result);
+            }
+        });
+     });
+
+    }
+
     logged = true;
     res.render('index', { title: 'Jogo da Velha Multiplayer', userList: userlist.get(), logged: logged});
 });
@@ -199,10 +215,6 @@ io.sockets.on('connection', function (socket) {
         sock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
         otherSock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
         sock.emit('requestAccepted', {userid: data.userid, requesterid: data.requesterid, shape: 'x'});
-    });
-
-    socket.on('updateGameSession', function(data) {
-        console.log('update');
     });
 
     socket.on('clearBoard', function(data) {

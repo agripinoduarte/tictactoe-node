@@ -7,15 +7,18 @@ var user = {
 	}
 };
 
+socket.on('connect', function () {
+    setCookie("sessionid", this.socket.sessionid, 1);
+    value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
+	loggeduser = value[0].slice(18,42);
+    sessionStorage.setItem('loggeduser', loggeduser);
+});
+
 socket.on('requestUser', function(data) {
 	ok = confirm('O jogador "' + data.username + '" deseja jogar com você. Clique em OK para iniciar a partida');
 	if (ok) {
 		socket.emit('acceptGame', {requesterid: data.requesterid, userid: data.userid});
 	}
-});
-
-socket.on('connect', function () {
-    setCookie("sessionid", this.socket.sessionid, 2);
 });
 
 socket.on('requestAccepted', function (data) {
@@ -24,34 +27,42 @@ socket.on('requestAccepted', function (data) {
 });
 
 socket.on('updateGameSessionCookie', function (data) {
-	setCookie('gamesessionid', data.gamesessionid, 2);
+	setCookie('gamesessionid', data.gamesessionid, 1);
 });
 
 
 function setCookie(c_name, value, exdays)
 {
-	var exdate = new Date();
-	exdate.setDate(exdate.getDate() + exdays);
-	var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-	document.cookie = c_name + "=" + c_value;
+	sessionStorage.setItem(c_name, value);
+	// var exdate = new Date();
+	// exdate.setDate(exdate.getDate() + exdays);
+	// var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+	// document.cookie = c_name + "=" + c_value;
 }
 
 function getLoggedUser()
 {
-	value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
-	loggeduser = value[0].slice(18,42);
-	return loggeduser;
+	return sessionStorage.getItem('loggeduser');
+	// value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
+	// loggeduser = value[0].slice(18,42);
+	// return loggeduser;
 }
 
 function getGameSession()
 {
-	value = document.cookie.match(/gamesessionid=[a-zA-Z0-9\%]+/);
-	gamesessionid = value[0].slice(14);
-	return gamesessionid;
+
+	return sessionStorage.getItem('gamesessionid');
+	// value = document.cookie.match(/gamesessionid=[a-zA-Z0-9\%]+/);
+
+	// if (value !== null) {
+	// 	gamesessionid = value[0].slice(14);
+	// 	return gamesessionid;	
+	// }	
+
+	// return '';	
 }
 
 function requestplay(e)
 {	
 	socket.emit('requestplay', {sessionid: socket.socket.sessionid, userid: e.getAttribute('rel'), requesterid: getLoggedUser()});
 }
-
