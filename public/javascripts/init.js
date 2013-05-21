@@ -34,32 +34,17 @@ socket.on('updateGameSessionCookie', function (data) {
 function setCookie(c_name, value, exdays)
 {
 	sessionStorage.setItem(c_name, value);
-	// var exdate = new Date();
-	// exdate.setDate(exdate.getDate() + exdays);
-	// var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-	// document.cookie = c_name + "=" + c_value;
 }
 
 function getLoggedUser()
 {
 	return sessionStorage.getItem('loggeduser');
-	// value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
-	// loggeduser = value[0].slice(18,42);
-	// return loggeduser;
 }
 
 function getGameSession()
 {
 
 	return sessionStorage.getItem('gamesessionid');
-	// value = document.cookie.match(/gamesessionid=[a-zA-Z0-9\%]+/);
-
-	// if (value !== null) {
-	// 	gamesessionid = value[0].slice(14);
-	// 	return gamesessionid;	
-	// }	
-
-	// return '';	
 }
 
 function requestplay(e)

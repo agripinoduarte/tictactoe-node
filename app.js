@@ -118,11 +118,9 @@ app.get('/', function(req, res) {
 
     if (user != undefined) {
         userlist.remove(user);
-        console.log('removido');
         client.collection('users', function(err, collection) {
         collection.findOne({username: user.username}, function(err, result) { 
             if (result != null) {
-                console.log('adicionado');
                 userlist.add(result);
             }
         });

@@ -1,6 +1,5 @@
 document.observe("dom:loaded", novo);
 var gamesessionid = getGameSession();
-console.log(gamesessionid);
 var tabuleiro;
 
 
@@ -71,7 +70,6 @@ Tabuleiro.prototype = {
 			} else {
 				tabuleiro.marcarX(tabuleiro.context, ponto);
 			}
-			return main(tabuleiro, new Event('click'));
 		});
 
 	},
