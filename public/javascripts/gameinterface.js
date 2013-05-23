@@ -30,6 +30,7 @@ function getParameterByName(name)
 	else
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
+
 //classe Ponto
 var Ponto = Class.create();
 Ponto.prototype = {

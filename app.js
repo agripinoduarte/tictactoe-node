@@ -1,8 +1,3 @@
-if (process.argv[2] == undefined) {
-    console.log('Informe o número da porta')
-    process.exit();
-}
-
 /**
  * Module dependencies.
 */
@@ -14,23 +9,24 @@ mongo = require('mongodb'),
 crypto = require('crypto');
 
 
-// Iniciando Aplicação
+/// Instância principal da aplicação ExpressJS
 var app = express();
 var http = require('http').createServer(app);
 
-//// Conexão ao MongoGB
+//// Instância da conexão ao MongoDB
 var client = new mongo.Db('tictactoe', new mongo.Server("localhost", 27017, {}), {w: 1});
 client.open(function(err, p_client) {
-	console.log("MongoDB Connected");
+	console.log('Conectado ao MongoDB');
     client.collection('users', function() {});
 });
 
 
-// Variaveis de Ambiente
-app.set('port', process.env.PORT || process.argv[2]);
+/// Variaveis de Ambiente
+app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+/// Definições do ExpressJS
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
@@ -39,15 +35,16 @@ app.use(express.cookieParser());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
-var recentUserId = null;
-var sockets = [];
-var users = [];
 
 // Somente Desenvolvimento 
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
 }
 
+/// Variáveis globais
+var recentUserId = null;
+var sockets = [];
+var users = [];
 var userlist = {
     list: [],
     add: function(user) {
@@ -60,9 +57,6 @@ var userlist = {
         var index = this.list.indexOf(user);
         if (index != -1) {
             this.list.splice(index, 1);
-            io.sockets.emit('user-list', {
-                'users': this.list
-            });
             return true;          
         }
         return false;
@@ -88,12 +82,23 @@ var gamesessions = {
         md = crypto.createHash('md5');
         md.update(userid + '-' + requesterid);
         id = md.digest('hex');
-        this.sessions.push({id: id, selfsocket: users[userid], othersocket: users[requesterid]});
+        this.sessions.push({
+            id: id, 
+            selfsocket: users[userid], 
+            othersocket: users[requesterid], 
+            userid: userid, 
+            requesterid: requesterid
+        });
         return id;
     },
 
-    remove: function () {
-
+    remove: function (session) {
+        var index = this.sessions.indexOf(session);
+        if (index != -1) {
+            this.sessions.splice(index, 1);
+            return true;          
+        }
+        return false;
     },
 
     getById: function (id) {
@@ -103,11 +108,19 @@ var gamesessions = {
             }
         }
         return false;
+    },
+
+    getByUserId: function(id) {
+        for (i = 0; i < this.sessions.length; i++) {
+            if (this.sessions[i].userid == id || this.sessions[i].requesterid == id) {
+                return this.sessions[i];
+            }
+        }
     }
 
 };
 
-///// Rotas
+/// Rotas para as ações da aplicação
 app.get('/', function(req, res) {
      if (req.cookies.loggeduser == 'false') {
         res.redirect('login');
@@ -116,6 +129,12 @@ app.get('/', function(req, res) {
     recentUserId = req.cookies.loggeduser;
     user = userlist.getById(recentUserId);
 
+    gamesession = gamesessions.getByUserId(recentUserId);
+    
+    if (gamesession != undefined) {
+        gamesessions.remove(gamesession);
+    }
+       
     if (user != undefined) {
         userlist.remove(user);
         client.collection('users', function(err, collection) {
@@ -125,7 +144,6 @@ app.get('/', function(req, res) {
             }
         });
      });
-
     }
 
     logged = true;
@@ -160,10 +178,6 @@ app.get('/logout', function(req, res) {
     userlist.remove(user);
 });
 
-
-// Socket.io
-var io = require('socket.io').listen(http);
-
 app.post('/login', function(req, res) {
     var request = req;
      client.collection('users', function(err, collection) {
@@ -180,15 +194,20 @@ app.post('/login', function(req, res) {
      });
 });
 
+
+/// Instância principal do Socket.io
+var io = require('socket.io').listen(http);
+
 io.sockets.on('connection', function (socket) {
-	console.log("Socket.io running");
+	console.log('Executando Socket.io');
     sockets[socket.id] = socket;
     users[recentUserId] = socket;
    
-    // Eventos
+    /// Gerenciamento dos eventos dos usuários
+
+    // Clique do jogador na casa do tabuleiro
     socket.on('playermove', function (data) {  
         gamesession = gamesessions.getById(data.gamesessionid);
-
         if (gamesession.selfsocket != undefined) {
             gamesession.selfsocket.emit('mark', {x: data.x, y: data.y, type: data.type});    
         }
@@ -198,12 +217,14 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    // Solicitação de jogo
     socket.on('requestplay', function (data) {
         sock = users[data.userid];
         user = userlist.getById(data.requesterid);
         sock.emit('requestUser', {username: user.username, userid: user._id, requesterid: data.userid});
     });
 
+    // Aceite de solicitação de jogo 
     socket.on('acceptGame', function(data) {
         sock = users[data.requesterid]; 
         gamesessionid = gamesessions.add(data.userid, data.requesterid);
@@ -215,6 +236,7 @@ io.sockets.on('connection', function (socket) {
         sock.emit('requestAccepted', {userid: data.userid, requesterid: data.requesterid, shape: 'x'});
     });
 
+    // Limpar tabuleiro
     socket.on('clearBoard', function(data) {
         gamesession = gamesessions.getById(data.gamesessionid);
 
@@ -229,7 +251,7 @@ io.sockets.on('connection', function (socket) {
 });
 
 
-// Servidor HTTP
+// Servidor HTTP do ExpressJS
 http.listen(app.get('port'), function(){
-    console.log('Express server listening on port ' + app.get('port'));
+    console.log('Servidor ExpressJS executando em ' + app.get('port'));
 });
