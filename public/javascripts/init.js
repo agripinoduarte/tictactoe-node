@@ -43,7 +43,6 @@ function getLoggedUser()
 
 function getGameSession()
 {
-
 	return sessionStorage.getItem('gamesessionid');
 }
 

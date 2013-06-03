@@ -3,7 +3,7 @@ var gamesessionid = getGameSession();
 var tabuleiro;
 
 
-////////////////////////// Observers /////////////////
+/////////////////////// Observers /////////////////////
 socket.on('clearAllBoards', function(data) {
 	novo();
 });
@@ -191,6 +191,8 @@ Tabuleiro.prototype = {
 	},
 	marcarJogada: function(number){
 		this.posicoes[number] = this.jogadorAtivo;
+
+		/// 
 		var marcar = user.myShape == 'x' ? this.marcarX : this.marcarBola;
 
 		if (number == 1) {
