@@ -9,12 +9,11 @@ block content
 			ul
 			each user in userList
 				li 
-					a#requester(href="#", onclick="return requestplay(this)", rel=user._id) #{user.username}
+					a#requester(href="#", onclick="return GameInterface.requestplay(this)", rel=user._id) #{user.username}
 		div
 			if (logged == true)
 			canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
 			input(type="button", value="novo", onclick="javascript:clearBoard()")
 		div(style="float:right")
 			a(href="/logout") Sair
-		script(src='https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js')
 		script(src='javascripts/gameinterface.js')

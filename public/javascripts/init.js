@@ -1,3 +1,28 @@
+var GameInterface = {
+	
+	setCookie: function(c_name, value, exdays) {
+		sessionStorage.setItem(c_name, value);
+	},
+
+	getLoggedUser: function()
+	{
+		return sessionStorage.getItem('loggeduser');
+	},
+
+	getGameSession: function()
+	{
+		return sessionStorage.getItem('gamesessionid');
+	},
+
+	requestplay: function(e)
+	{	
+		socket.emit('requestplay', {sessionid: socket.socket.sessionid, userid: e.getAttribute('rel'), requesterid: this.getLoggedUser()});
+	},
+}
+
+
+
+
 var socket = io.connect('http://localhost:3000');
 
 var user = {
@@ -8,7 +33,7 @@ var user = {
 };
 
 socket.on('connect', function () {
-    setCookie("sessionid", this.socket.sessionid, 1);
+    GameInterface.setCookie("sessionid", this.socket.sessionid, 1);
     value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
 	loggeduser = value[0].slice(18,42);
     sessionStorage.setItem('loggeduser', loggeduser);
@@ -27,26 +52,6 @@ socket.on('requestAccepted', function (data) {
 });
 
 socket.on('updateGameSessionCookie', function (data) {
-	setCookie('gamesessionid', data.gamesessionid, 1);
+	GameInterface.setCookie('gamesessionid', data.gamesessionid, 1);
 });
 
-
-function setCookie(c_name, value, exdays)
-{
-	sessionStorage.setItem(c_name, value);
-}
-
-function getLoggedUser()
-{
-	return sessionStorage.getItem('loggeduser');
-}
-
-function getGameSession()
-{
-	return sessionStorage.getItem('gamesessionid');
-}
-
-function requestplay(e)
-{	
-	socket.emit('requestplay', {sessionid: socket.socket.sessionid, userid: e.getAttribute('rel'), requesterid: getLoggedUser()});
-}

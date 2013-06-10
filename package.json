@@ -9,6 +9,7 @@
     "express": "3.2.0",
     "jade": "*",
     "socket.io": "*",
-    "mongodb": "*"
+    "mongodb": "*",
+    "socket.io-client": "*"
   }
 }

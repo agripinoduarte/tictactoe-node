@@ -207,6 +207,7 @@ io.sockets.on('connection', function (socket) {
 
     // Clique do jogador na casa do tabuleiro
     socket.on('playermove', function (data) {  
+        console.log(data);
         gamesession = gamesessions.getById(data.gamesessionid);
         if (gamesession.selfsocket != undefined) {
             gamesession.selfsocket.emit('mark', {x: data.x, y: data.y, type: data.type});    
@@ -221,6 +222,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('requestplay', function (data) {
         sock = users[data.userid];
         user = userlist.getById(data.requesterid);
+        console.log(user);
         sock.emit('requestUser', {username: user.username, userid: user._id, requesterid: data.userid});
     });
 
