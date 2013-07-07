@@ -3,11 +3,9 @@ extends layout
 block content
 	div#content
 		h1= title
-		p Cadastre-se para jogar
 		if (logged == true)
 			canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
-			input(type="button", value="novo", onclick="javascript:novo()")
+			input(type="button", value="Zerar", onclick="javascript:clear()")
 		div
 			a(href="/logout") Sair
-	script(src='https://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js')
 	script(src='javascripts/gameinterface.js')

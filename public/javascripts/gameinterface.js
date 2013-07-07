@@ -1,45 +1,42 @@
 window.onload = novo;
 var gamesessionid = GameInterface.getGameSession();
-var tabuleiro;
-var p1, p2, currentPlayer;
+var tabuleiro, p1, p2, localPlayer;
 
 
 /////////////////////// Observers /////////////////////
-socket.on('clearAllBoards', function(data) {
-	novo();
-});
+socket.on('clearAllBoards', reload);
 
 /////////////////////// Funções //////////////////////
 function clearBoard() {
+	socket.emit('clearBoard', {gamesessionid: gamesessionid});
+}
 
-	if (gamesessionid != undefined) {
-		socket.emit('clearBoard', {gamesessionid: gamesessionid});
-	} else {
-		novo();
-	}
+function clear() {
+	sessionStorage.removeItem('gamesessionid');
+	tabuleiro.limpaTabuleiro();
+}
+
+function reload() {
+	clear();
+	// document.location.reload(true);
 }
 
 function novo() {
+	delete tabuleiro;
+	delete p1;
+	delete p2;
+	delete localPlayer;
+
 	tabuleiro = new Tabuleiro('velha');
 	p1 = new Player(GameInterface.getLoggedUser());
 	p2 = new Player(null);
+	
 	p1.id = 1;
 	p2.id = 2;
-	currentPlayer = p1;
+	
+	localPlayer = p1;
 }
 
-function getParameterByName(name)
-{
-	name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-	var regexS = "[\\?&]" + name + "=([^&#]*)";
-	var regex = new RegExp(regexS);
-	var results = regex.exec(window.location.search);
-	
-	if(results == null)
-		return "";
-	else
-		return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
 
 //classe Ponto
 var Ponto = function(x, y) {
@@ -55,18 +52,20 @@ var Ponto = function(x, y) {
 	this.setY(y);
 };
 
+// classe Player
 var Player = function(userid) {
 	this.userid = userid;
 	this.userid = null;
 	this.squares = [];
 
 	this.checkWin = function () {
-		return 
-			(this.squares[0] + this.squares[1] + this.squares[2]) % 6 == 0 ||
+		win = (this.squares[0] + this.squares[1] + this.squares[2]) % 6 == 0 ||
 			(this.squares[0] + this.squares[1] + this.squares[2]) % 12 == 0 ||
 			(this.squares[0] + this.squares[1] + this.squares[2]) % 15 == 0 ||
 			(this.squares[0] + this.squares[1] + this.squares[2]) % 18 == 0 ||
 			(this.squares[0] + this.squares[1] + this.squares[2]) % 24 == 0;
+
+		return win;
 	};
 };
 
@@ -74,6 +73,8 @@ var Player = function(userid) {
 
 //classe Tabuleiro
 var Tabuleiro = function(canvasId) {
+	this.posicoes = [null, null, null, null, null, null, null, null, null];
+
 	this.setCanvas = function(canvas) {
 		this.canvas = canvas;
 	};
@@ -83,7 +84,9 @@ var Tabuleiro = function(canvasId) {
 	};
 
 	this.setPosicoes = function(posicoes) {
-		this.posicoes = posicoes;
+		for (var i = this.posicoes.length - 1; i >= 0; i--) {
+			this.posicoes[i] = null;
+		};
 	};
 
 	this.setJogadorAtivo = function(jogadorAtivo) {
@@ -200,6 +203,31 @@ var Tabuleiro = function(canvasId) {
 		context.stroke();
 	};
 
+	this.limpaTabuleiro = function() {
+		this.setPosicoes(null);
+		this.context.fillStyle = "#FFFFFF";
+		this.context.fillRect(10,10,90,90);
+		this.context.fill();
+		this.context.fillRect(105,10,95,90);
+		this.context.fill();
+		this.context.fillRect(205,10,95,90);
+		this.context.fill();
+		
+		this.context.fillRect(10,105,90,95);
+		this.context.fill();
+		this.context.fillRect(105,105,95,95);
+		this.context.fill();
+		this.context.fillRect(205,105,95,95);
+		this.context.fill();
+
+		this.context.fillRect(10,205,90,95);
+		this.context.fill();
+		this.context.fillRect(105,205,95,95);
+		this.context.fill();
+		this.context.fillRect(205,205,95,95);
+		this.context.fill();
+	};
+
 	this.marcarJogada = function(number){
 		this.posicoes[number] = this.jogadorAtivo;
 
@@ -210,6 +238,7 @@ var Tabuleiro = function(canvasId) {
 			var bot = this.jogadorAtivo ? this.marcarBola : this.marcarX;
 		}
 
+		// bot que marca posições aleatórias
 		pos = [30, 130, 230];
 		rX = pos[Math.floor(Math.random() * 3)];
 		rY = pos[Math.floor(Math.random() * 3)];
@@ -234,7 +263,7 @@ var Tabuleiro = function(canvasId) {
 			marcar(this.context, ponto = new Ponto(230, 230));
 		}
 
-		socket.emit('playermove', { x: ponto.x, y : ponto.y, type : user.myShape , gamesessionid: gamesessionid});
+		socket.emit('playermove', {square: number, x: ponto.x, y : ponto.y, type : user.myShape , gamesessionid: gamesessionid});
 	};
 
 	var e;
@@ -247,9 +276,8 @@ var Tabuleiro = function(canvasId) {
 	this.setJogadorAtivo(true);
 	this.desenhar();
 	
-	canvas.onclick = function(event) {
-		e = event;
-		return main(tabuleiro, event);
+	canvas.onclick = function(e) {
+		return main(tabuleiro, e);
 	};
 
 	socket.on('mark', function(data) {
@@ -260,31 +288,39 @@ var Tabuleiro = function(canvasId) {
 			tabuleiro.marcarX(tabuleiro.context, ponto);
 		}
 
-		if (tabuleiro.venceu(tabuleiro.jogadorAtivo)) {
-			alert('Jogador ' + (tabuleiro.jogadorAtivo ? 'xis vermelho' : 'bola verde') + ' venceu!');
-			tabuleiro.setPosicoes(null);
-		} else {
-			tabuleiro.setJogadorAtivo(!tabuleiro.jogadorAtivo);
-		}
+		localPlayer.squares.push(data.square);
+		console.log(localPlayer.id);
+		console.log(localPlayer.squares);
+		
+		if(localPlayer.checkWin()) {
+			alert('Jogador ' + localPlayer.id + '  venceu');
+			p1.squares = [];
+			p2.squares = [];
+		} 
+		
+		localPlayer = localPlayer.id == p1.id ? p2 : p1; 
 	});
-
 }
 
 //metodo com a regra do jogo
 function main(tabuleiro, event) {
 	var quadrado = tabuleiro.obterQuadradoSelecionado(tabuleiro.posicaoCursor(event));
 	if (tabuleiro.posicoes[quadrado] == null) {
-		tabuleiro.marcarJogada(quadrado);
-		currentPlayer.squares.push(quadrado);
+		tabuleiro.marcarJogada(quadrado);	
+		// localPlayer.squares.push(quadrado);
+		
+		if(localPlayer.checkWin()) {
+			alert('Jogador ' + localPlayer.id + '  venceu');
+			tabuleiro.setPosicoes(null);
+		} 
 
 		if (tabuleiro.venceu(tabuleiro.jogadorAtivo)) {
 			alert('Jogador ' + (tabuleiro.jogadorAtivo ? 'xis vermelho' : 'bola verde') + ' venceu!');
 			tabuleiro.setPosicoes(null);
 		} else {
 			tabuleiro.setJogadorAtivo(!tabuleiro.jogadorAtivo);
-		}
+		}	
 
-		console.log(currentPlayer);
-		currentPlayer = currentPlayer.id == p1.id ? p2 : p1; 
+		// localPlayer = localPlayer.id == p1.id ? p2 : p1; 
 	}
 }

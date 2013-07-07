@@ -4,16 +4,17 @@ block content
 		h1= title
 		div#game
 		if (logged == true)
-			p Escolha um jogador da lista
 			div#userList
-			ul
-			each user in userList
-				li 
-					a#requester(href="#", onclick="return GameInterface.requestplay(this)", rel=user._id) #{user.username}
-		div
-			if (logged == true)
-			canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
-			input(type="button", value="novo", onclick="javascript:clearBoard()")
+				p Escolha um jogador da lista
+				ul
+				each user in userList
+					li 
+						a#requester(href="#", onclick="return GameInterface.requestplay(this)", rel=user._id) #{user.username}
+		if (logged == true)
+			div#layer.hidden
+				canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
+				input(type="button",value="Novo Jogo", onclick="return clearBoard()")
+
 		div(style="float:right")
 			a(href="/logout") Sair
 		script(src='javascripts/gameinterface.js')

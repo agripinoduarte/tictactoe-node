@@ -1,5 +1,5 @@
 /**
- * Module dependencies.
+ * Dependências.
 */
 var express = require('express'), 
 routes = require('./routes'),  
@@ -9,12 +9,13 @@ mongo = require('mongodb'),
 crypto = require('crypto');
 
 
-/// Instância principal da aplicação ExpressJS
+/// Instância principal da aplicação ExpressJS e servidor HTTP
 var app = express();
 var http = require('http').createServer(app);
 
 //// Instância da conexão ao MongoDB
 var client = new mongo.Db('tictactoe', new mongo.Server("localhost", 27017, {}), {w: 1});
+
 client.open(function(err, p_client) {
 	console.log('Conectado ao MongoDB');
     client.collection('users', function() {});
@@ -167,7 +168,7 @@ app.get('/login', function(req, res) {
 });
 
 app.get('/game', function(req, res) {
-    res.render('game', {title: "Novo Jogo"});
+    res.render('game', {title: "Jogo da Velha"});
 });
 
 app.get('/logout', function(req, res) {
@@ -207,14 +208,13 @@ io.sockets.on('connection', function (socket) {
 
     // Clique do jogador na casa do tabuleiro
     socket.on('playermove', function (data) {  
-        console.log(data);
         gamesession = gamesessions.getById(data.gamesessionid);
         if (gamesession.selfsocket != undefined) {
-            gamesession.selfsocket.emit('mark', {x: data.x, y: data.y, type: data.type});    
+            gamesession.selfsocket.emit('mark', {square: data.square, x: data.x, y: data.y, type: data.type});    
         }
 
         if (gamesession.othersocket != undefined) {
-            gamesession.othersocket.emit('mark', {x: data.x, y: data.y, type: data.type});
+            gamesession.othersocket.emit('mark', {square: data.square, x: data.x, y: data.y, type: data.type});
         }
     });
 

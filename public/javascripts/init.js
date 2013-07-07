@@ -1,7 +1,11 @@
 var GameInterface = {
 	
-	setCookie: function(c_name, value, exdays) {
+	set: function(c_name, value) {
 		sessionStorage.setItem(c_name, value);
+	},
+
+	get: function(name) {
+		return sessionStorage.getItem(name);
 	},
 
 	getLoggedUser: function()
@@ -21,8 +25,6 @@ var GameInterface = {
 }
 
 
-
-
 var socket = io.connect('http://localhost:3000');
 
 var user = {
@@ -33,7 +35,7 @@ var user = {
 };
 
 socket.on('connect', function () {
-    GameInterface.setCookie("sessionid", this.socket.sessionid, 1);
+    GameInterface.set("sessionid", this.socket.sessionid);
     value = document.cookie.match(/loggeduser=[a-zA-Z0-9\%]+/);
 	loggeduser = value[0].slice(18,42);
     sessionStorage.setItem('loggeduser', loggeduser);
@@ -52,6 +54,8 @@ socket.on('requestAccepted', function (data) {
 });
 
 socket.on('updateGameSessionCookie', function (data) {
-	GameInterface.setCookie('gamesessionid', data.gamesessionid, 1);
+	GameInterface.set('gamesessionid', data.gamesessionid);
+	document.getElementById('userList').setAttribute('class', 'hidden');
+	document.getElementById('layer').setAttribute('class', 'show');
 });
 

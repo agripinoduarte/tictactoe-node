@@ -13,3 +13,11 @@ a {  color: #00B7FF; }
 #sidebar {
 	margin-right: 30%;
 }
+
+.hidden {
+	display: none;
+}
+
+.show {
+	display: block;
+}
