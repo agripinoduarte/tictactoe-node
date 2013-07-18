@@ -46,6 +46,7 @@ if ('development' == app.get('env')) {
 var recentUserId = null;
 var sockets = [];
 var users = [];
+
 var userlist = {
     list: [],
     add: function(user) {
@@ -159,7 +160,6 @@ app.post('/register', function(req, res) {
 	client.collection('users', function(err, collection) {
 		collection.save(req.body, function() {});
 	});
-
 	res.redirect('/');
 });
 
@@ -181,7 +181,7 @@ app.get('/logout', function(req, res) {
 
 app.post('/login', function(req, res) {
     var request = req;
-     client.collection('users', function(err, collection) {
+    client.collection('users', function(err, collection) {
         collection.findOne({username: request.body.user.username}, function(err, result) { 
             if (result != null && request.body.user.password == result.password) {
                 recentUserId = result._id;
@@ -210,11 +210,11 @@ io.sockets.on('connection', function (socket) {
     socket.on('playermove', function (data) {  
         gamesession = gamesessions.getById(data.gamesessionid);
         if (gamesession.selfsocket != undefined) {
-            gamesession.selfsocket.emit('mark', {square: data.square, x: data.x, y: data.y, type: data.type});    
+            gamesession.selfsocket.emit('mark', {square: data.square, x: data.x, y: data.y, type: data.type, userid: data.userid});    
         }
 
         if (gamesession.othersocket != undefined) {
-            gamesession.othersocket.emit('mark', {square: data.square, x: data.x, y: data.y, type: data.type});
+            gamesession.othersocket.emit('mark', {square: data.square, x: data.x, y: data.y, type: data.type, userid: data.userid});
         }
     });
 
@@ -222,19 +222,22 @@ io.sockets.on('connection', function (socket) {
     socket.on('requestplay', function (data) {
         sock = users[data.userid];
         user = userlist.getById(data.requesterid);
-        console.log(user);
         sock.emit('requestUser', {username: user.username, userid: user._id, requesterid: data.userid});
     });
 
     // Aceite de solicitação de jogo 
     socket.on('acceptGame', function(data) {
-        sock = users[data.requesterid]; 
         gamesessionid = gamesessions.add(data.userid, data.requesterid);
+        p1 = userlist.getById(data.requesterid);
+        p2 = userlist.getById(data.userid);
+        p1.password = null;
+        p2.password = null;
+
         sock = users[data.userid];
         otherSock = users[data.requesterid];
 
-        sock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
-        otherSock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid});
+        sock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid, p1: p1, p2: p2});
+        otherSock.emit('updateGameSessionCookie', {gamesessionid: gamesessionid, p1: p1, p2: p2});
         sock.emit('requestAccepted', {userid: data.userid, requesterid: data.requesterid, shape: 'x'});
     });
 

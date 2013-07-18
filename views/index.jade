@@ -13,7 +13,8 @@ block content
 		if (logged == true)
 			div#layer.hidden
 				canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
-				input(type="button",value="Novo Jogo", onclick="return clearBoard()")
+				input(type="button",value="Voltar", onclick="return endGame()")
+				input(type="button",value="Limpar", onclick="return clearBoard()")
 
 		div(style="float:right")
 			a(href="/logout") Sair

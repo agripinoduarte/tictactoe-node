@@ -1,7 +1,6 @@
 window.onload = novo;
 var gamesessionid = GameInterface.getGameSession();
-var tabuleiro, p1, p2, localPlayer;
-
+var tabuleiro, p1, p2, currentPlayer;
 
 /////////////////////// Observers /////////////////////
 socket.on('clearAllBoards', reload);
@@ -14,27 +13,30 @@ function clearBoard() {
 function clear() {
 	sessionStorage.removeItem('gamesessionid');
 	tabuleiro.limpaTabuleiro();
+	p1.squares = [];
+	p2.squares = [];
+	currentPlayer = [];
+}
+
+function endGame() {
+	sessionStorage.removeItem('gamesessionid');
+	window.location.reload(true);
 }
 
 function reload() {
 	clear();
-	// document.location.reload(true);
 }
 
 function novo() {
 	delete tabuleiro;
 	delete p1;
 	delete p2;
-	delete localPlayer;
+	delete currentPlayer;
+
+	var player1 = GameInterface.get('p1');
+	var player2 = GameInterface.get('p2');
 
 	tabuleiro = new Tabuleiro('velha');
-	p1 = new Player(GameInterface.getLoggedUser());
-	p2 = new Player(null);
-	
-	p1.id = 1;
-	p2.id = 2;
-	
-	localPlayer = p1;
 }
 
 
@@ -51,24 +53,6 @@ var Ponto = function(x, y) {
 	this.setX(x);
 	this.setY(y);
 };
-
-// classe Player
-var Player = function(userid) {
-	this.userid = userid;
-	this.userid = null;
-	this.squares = [];
-
-	this.checkWin = function () {
-		win = (this.squares[0] + this.squares[1] + this.squares[2]) % 6 == 0 ||
-			(this.squares[0] + this.squares[1] + this.squares[2]) % 12 == 0 ||
-			(this.squares[0] + this.squares[1] + this.squares[2]) % 15 == 0 ||
-			(this.squares[0] + this.squares[1] + this.squares[2]) % 18 == 0 ||
-			(this.squares[0] + this.squares[1] + this.squares[2]) % 24 == 0;
-
-		return win;
-	};
-};
-
 
 
 //classe Tabuleiro
@@ -263,7 +247,14 @@ var Tabuleiro = function(canvasId) {
 			marcar(this.context, ponto = new Ponto(230, 230));
 		}
 
-		socket.emit('playermove', {square: number, x: ponto.x, y : ponto.y, type : user.myShape , gamesessionid: gamesessionid});
+		socket.emit('playermove', {
+			square: number, 
+			x: ponto.x, 
+			y : ponto.y, 
+			type : user.myShape, 
+			gamesessionid: gamesessionid, 
+			userid: GameInterface.getLoggedUser()
+		});
 	};
 
 	var e;
@@ -288,17 +279,24 @@ var Tabuleiro = function(canvasId) {
 			tabuleiro.marcarX(tabuleiro.context, ponto);
 		}
 
-		localPlayer.squares.push(data.square);
-		console.log(localPlayer.id);
-		console.log(localPlayer.squares);
-		
-		if(localPlayer.checkWin()) {
-			alert('Jogador ' + localPlayer.id + '  venceu');
+		if (data.userid == p1.userid) {
+			currentPlayer = p1;
+		}
+
+		if (data.userid == p2.userid) {
+			currentPlayer = p2;
+		}
+
+		currentPlayer.squares.push(data.square);
+
+		if(currentPlayer.checkWin()) {
+			alert('Jogador ' + currentPlayer.name + '  venceu');
 			p1.squares = [];
 			p2.squares = [];
+			currentPlayer = [];
 		} 
 		
-		localPlayer = localPlayer.id == p1.id ? p2 : p1; 
+		// currentPlayer = currentPlayer.id == p1.id ? p2 : p1; 
 	});
 }
 
@@ -307,10 +305,10 @@ function main(tabuleiro, event) {
 	var quadrado = tabuleiro.obterQuadradoSelecionado(tabuleiro.posicaoCursor(event));
 	if (tabuleiro.posicoes[quadrado] == null) {
 		tabuleiro.marcarJogada(quadrado);	
-		// localPlayer.squares.push(quadrado);
+		// currentPlayer.squares.push(quadrado);
 		
-		if(localPlayer.checkWin()) {
-			alert('Jogador ' + localPlayer.id + '  venceu');
+		if (currentPlayer != undefined && currentPlayer.checkWin()) {
+			alert('Jogador ' + currentPlayer.id + '  venceu');
 			tabuleiro.setPosicoes(null);
 		} 
 
@@ -321,6 +319,6 @@ function main(tabuleiro, event) {
 			tabuleiro.setJogadorAtivo(!tabuleiro.jogadorAtivo);
 		}	
 
-		// localPlayer = localPlayer.id == p1.id ? p2 : p1; 
+		// currentPlayer = currentPlayer.id == p1.id ? p2 : p1; 
 	}
 }

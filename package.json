@@ -1,5 +1,5 @@
 {
-  "name": "Jogo Da Velha Online",
+  "name": "tictactoe",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -10,6 +10,7 @@
     "jade": "*",
     "socket.io": "*",
     "mongodb": "*",
-    "socket.io-client": "*"
+    "socket.io-client": "*",
+    "request": "*"
   }
 }
