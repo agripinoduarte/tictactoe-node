@@ -3,19 +3,20 @@ block content
 	div#content
 		h1= title
 		div#game
-		if (logged == true)
+		if (logged != '0')
 			div#userList
 				p Escolha um jogador da lista
 				ul
 				each user in userList
 					li 
 						a#requester(href="#", onclick="return GameInterface.requestplay(this)", rel=user._id) #{user.username}
-		if (logged == true)
+		if (logged != '0')
 			div#layer.hidden
 				canvas#velha(height="300", width="300") Canvas não habilitado em seu navegador
 				input(type="button",value="Voltar", onclick="return endGame()")
 				input(type="button",value="Limpar", onclick="return clearBoard()")
-
 		div(style="float:right")
+			input(type="button",value="single-player", onclick="return single()")
+			&nbsp;
 			a(href="/logout") Sair
 		script(src='javascripts/gameinterface.js')

@@ -122,7 +122,6 @@ var Player = function(player) {
 					return true;
 			}
 		}
-		
 
 		return false;
 	};
@@ -130,6 +129,8 @@ var Player = function(player) {
 
 
 var socket = io.connect('http://localhost:3000');
+var gamesessionid;
+var loggeduser = 0;
 
 var user = {
 	myShape: 'circle',
@@ -161,6 +162,8 @@ socket.on('updateGameSessionCookie', function (data) {
 	GameInterface.set('gamesessionid', data.gamesessionid);
 	GameInterface.set('p1', data.p1);
 	GameInterface.set('p2', data.p2);
+	
+		gamesessionid = data.gamesessionid;
 
 	document.getElementById('userList').setAttribute('class', 'hidden');
 	document.getElementById('layer').setAttribute('class', 'show');

@@ -1,5 +1,6 @@
 window.onload = novo;
-var gamesessionid = GameInterface.getGameSession();
+if (gamesessionid == undefined)
+	var gamesessionid = GameInterface.getGameSession();
 var tabuleiro, p1, p2, currentPlayer;
 
 /////////////////////// Observers /////////////////////
@@ -8,6 +9,11 @@ socket.on('clearAllBoards', reload);
 /////////////////////// Funções //////////////////////
 function clearBoard() {
 	socket.emit('clearBoard', {gamesessionid: gamesessionid});
+}
+
+function single() {
+	document.getElementById('userList').setAttribute('class', 'hidden');
+	document.getElementById('layer').setAttribute('class', 'show');
 }
 
 function clear() {
