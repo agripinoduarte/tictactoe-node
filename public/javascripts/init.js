@@ -8,6 +8,7 @@ combinations = new Array(
 	[2,5,8],
 	[3,6,9]
 );
+
 var GameInterface = {
 	
 	set: function(c_name, value) {
@@ -126,7 +127,6 @@ var Player = function(player) {
 		return false;
 	};
 };
-
 
 var socket = io.connect('http://localhost:3000');
 var gamesessionid;

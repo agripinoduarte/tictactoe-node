@@ -6,11 +6,10 @@ O núcleo do jogo no servidor utiliza WebSocket, para manter uma conexão consta
 a extensão Socket.io. Os dadosdos jogadores são persistidos no banco de dados não-relacional MongoDB. 
 
 ## Requisitos
-O aplicativo roda em qualquer sistema operacional onde o Node.js e MongoDB tenham suporte. Em geral, sistemas Unix (Linux,
-BSD e MacOS) e Windows. Requisitos mínimos
+O aplicativo roda em qualquer sistema operacional suportado pelo Node.js e MongoDB (Linux, MacOS e Windows). Requisitos mínimos
 	
-	NodeJS 0.4.8
-	MongoDB 2.4
+	NodeJS > 0.4.8
+	MongoDB > 2.4
 
 ## Instalação 
 
@@ -28,6 +27,6 @@ para instalar as dependências.
 
 Para iniciar a aplicação no servidor, execute
 
-	node app <numero_da_porta>
+	node app
 
-Para acessar a aplicação, digite <nome_do_host>/<numero_da_porta>
+Para acessar a aplicação localmente acesse http://locahost:3000
