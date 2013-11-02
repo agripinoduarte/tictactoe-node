@@ -1,9 +1,9 @@
 # Jogo da Velha Online Multiplayer
 
 ## Introdução
-O Jogo da Velha Multiplayer é um aplicativo web em HTML e JavaScript cujo server-side é desenvolvido em Node.js.
-O núcleo do jogo no servidor utiliza WebSocket, para manter uma conexão constante entre cliente e servidor, utilizando
-a extensão Socket.io. Os dadosdos jogadores são persistidos no banco de dados não-relacional MongoDB. 
+O Jogo da Velha Multiplayer é um web app em HTML5 e JavaScript com server-side desenvolvido em Node.js + ExpressJS.
+O núcleo do jogo no servidor utiliza o protocolo WebSocket para manter uma sessão entre cliente e servidor utilizando
+a extensão Socket.io. Os dados dos jogadores são persistidos no banco de dados não-relacional MongoDB. 
 
 ## Requisitos
 O aplicativo roda em qualquer sistema operacional suportado pelo Node.js e MongoDB (Linux, MacOS e Windows). Requisitos mínimos
